@@ -5,8 +5,10 @@
  */
 package com.mycompany.hibernate5;
 
+import com.mycompany.hibernate5.sakila.domain.Address;
 import com.mycompany.hibernate5.sakila.domain.Customer;
 import com.mycompany.hibernate5.sakila.domain.Customer_;
+import com.mycompany.hibernate5.sakila.domain.Address_;
 import com.mycompany.hibernate5.sakila.domain.Payment;
 import com.mycompany.hibernate5.sakila.domain.Rental;
 import java.util.List;
@@ -17,6 +19,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
 
 /**
@@ -142,12 +145,15 @@ public class Main {
 			CriteriaBuilder builder = em.getCriteriaBuilder();
 			CriteriaQuery<Customer> criteria = builder.createQuery( Customer.class );
 			Root<Customer> root = criteria.from( Customer.class );
+			Join<Customer, Address> address = root.join(Customer_.addressId);
 			criteria.select(root);
-			criteria.where( builder.equal( root.get( Customer_.lastName ), "Vest" ) );
+			criteria.where( builder.and( builder.equal(root.get( Customer_.lastName ), "Vest")
+				, builder.like(address.get( Address_.address ), "923%") ) );
 			
 			List<Customer> customers = em.createQuery( criteria ).getResultList();
 			for (Customer cust : customers) {
 				lg.info("Customer Name: " + cust.getFirstName() + " " + cust.getLastName());
+				lg.info("Address: " + cust.getAddressId().getAddress());
 			}
 			
 		} catch (Exception e) {
