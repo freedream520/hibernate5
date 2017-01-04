@@ -6,6 +6,7 @@
 package com.mycompany.hibernate5;
 
 import com.mycompany.hibernate5.sakila.domain.Customer;
+import com.mycompany.hibernate5.sakila.domain.Customer_;
 import com.mycompany.hibernate5.sakila.domain.Payment;
 import com.mycompany.hibernate5.sakila.domain.Rental;
 import java.util.List;
@@ -14,6 +15,9 @@ import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 /**
  *
@@ -34,8 +38,9 @@ public class Main {
 		EntityManagerFactory emf = Persistence.createEntityManagerFactory("sakila");
 
 		try {
-			nativeQuery(emf);
-			testJPA(emf);
+			criteriaQuery(emf);
+//			nativeQuery(emf);
+//			testJPA(emf);
 		} finally {
 			if (emf != null && emf.isOpen()) {
 				emf.close();
@@ -48,8 +53,6 @@ public class Main {
 
 		EntityManager em = emf.createEntityManager();
 		try {
-//			emf = Persistence.createEntityManagerFactory("sakila");
-//			em = emf.createEntityManager();
 			String q = "select c from Customer c WHERE c.lastName = :lastName";
 			em.getTransaction().begin();
 			List<Customer> list = em.createQuery(q, Customer.class)
@@ -123,12 +126,39 @@ public class Main {
 
 		} catch (Exception e) {
 			lg.log(Level.SEVERE, e.getMessage(), e);
-			e.printStackTrace();
+//			e.printStackTrace();
 		} finally {
 			if (em != null) {
 				em.close();
 			}
 		}
+	}
+
+	private static void criteriaQuery(EntityManagerFactory emf) {
+		
+		EntityManager em = emf.createEntityManager();
+		try {
+			lg.info("testing criteria query in hibernate");
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Customer> criteria = builder.createQuery( Customer.class );
+			Root<Customer> root = criteria.from( Customer.class );
+			criteria.select(root);
+			criteria.where( builder.equal( root.get( Customer_.lastName ), "Vest" ) );
+			
+			List<Customer> customers = em.createQuery( criteria ).getResultList();
+			for (Customer cust : customers) {
+				lg.info("Customer Name: " + cust.getFirstName() + " " + cust.getLastName());
+			}
+			
+		} catch (Exception e) {
+			lg.log(Level.SEVERE, e.getMessage(), e);
+//			e.printStackTrace();
+		} finally {
+			if (em != null && em.isOpen()) {
+				em.close();
+			}
+		}
+		
 	}
 
 }
