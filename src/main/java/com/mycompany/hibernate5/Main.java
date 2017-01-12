@@ -41,9 +41,9 @@ public class Main {
 		EntityManagerFactory emf = Persistence.createEntityManagerFactory("sakila");
 
 		try {
-			criteriaQuery(emf);
+//			criteriaQuery(emf);
 //			nativeQuery(emf);
-//			testJPA(emf);
+			testJPA(emf);
 		} finally {
 			if (emf != null && emf.isOpen()) {
 				emf.close();
@@ -60,7 +60,7 @@ public class Main {
 			em.getTransaction().begin();
 			List<Customer> list = em.createQuery(q, Customer.class)
 				.setParameter("lastName", "Vest")
-				//				.setHint( "org.hibernate.readOnly", true )
+				.setHint("org.hibernate.readOnly", true)
 				.getResultList();
 
 			for (Customer c : list) {
@@ -106,7 +106,7 @@ public class Main {
 			//do queries
 			String ql = "select c from Customer c "
 				+ "join fetch c.rentalList r "
-				//                    + "join fetch c.paymentList p "
+				+ "join c.paymentList p "
 				+ "where c.lastName = :lastName";
 			List<Customer> list = em.createQuery(ql).setParameter("lastName", "Vest")
 				.setMaxResults(10).getResultList();
@@ -122,40 +122,18 @@ public class Main {
 						break;
 					}
 				}
+
+				//TODO Solve lazy load exception for detached state.
+//				em.close();
+
 				for (Payment p : c.getPaymentList()) {
 					lg.log(Level.INFO, "Payment id: {0} Amount: {1}", new Object[]{p.getPaymentId(), p.getAmount()});
 				}
-			}
 
-		} catch (Exception e) {
-			lg.log(Level.SEVERE, e.getMessage(), e);
-//			e.printStackTrace();
-		} finally {
-			if (em != null) {
-				em.close();
+//				c.getAddressId().getAddress();
 			}
-		}
-	}
+			lg.info("finished query");
 
-	private static void criteriaQuery(EntityManagerFactory emf) {
-		
-		EntityManager em = emf.createEntityManager();
-		try {
-			lg.info("testing criteria query in hibernate");
-			CriteriaBuilder builder = em.getCriteriaBuilder();
-			CriteriaQuery<Customer> criteria = builder.createQuery( Customer.class );
-			Root<Customer> root = criteria.from( Customer.class );
-			Join<Customer, Address> address = root.join(Customer_.addressId);
-			criteria.select(root);
-			criteria.where( builder.and( builder.equal(root.get( Customer_.lastName ), "Vest")
-				, builder.like(address.get( Address_.address ), "923%") ) );
-			
-			List<Customer> customers = em.createQuery( criteria ).getResultList();
-			for (Customer cust : customers) {
-				lg.info("Customer Name: " + cust.getFirstName() + " " + cust.getLastName());
-				lg.info("Address: " + cust.getAddressId().getAddress());
-			}
-			
 		} catch (Exception e) {
 			lg.log(Level.SEVERE, e.getMessage(), e);
 //			e.printStackTrace();
@@ -164,7 +142,36 @@ public class Main {
 				em.close();
 			}
 		}
-		
+	}
+
+	private static void criteriaQuery(EntityManagerFactory emf) {
+
+		EntityManager em = emf.createEntityManager();
+		try {
+			lg.info("testing criteria query in hibernate");
+			CriteriaBuilder builder = em.getCriteriaBuilder();
+			CriteriaQuery<Customer> criteria = builder.createQuery(Customer.class);
+			Root<Customer> root = criteria.from(Customer.class);
+			Join<Customer, Address> address = root.join(Customer_.addressId);
+			criteria.select(root);
+			criteria.where(builder.and(builder.equal(root.get(Customer_.lastName), "Vest"),
+				builder.like(address.get(Address_.address), "923%")));
+
+			List<Customer> customers = em.createQuery(criteria).getResultList();
+			for (Customer cust : customers) {
+				lg.info("Customer Name: " + cust.getFirstName() + " " + cust.getLastName());
+				lg.info("Address: " + cust.getAddressId().getAddress());
+			}
+
+		} catch (Exception e) {
+			lg.log(Level.SEVERE, e.getMessage(), e);
+//			e.printStackTrace();
+		} finally {
+			if (em != null && em.isOpen()) {
+				em.close();
+			}
+		}
+
 	}
 
 }
