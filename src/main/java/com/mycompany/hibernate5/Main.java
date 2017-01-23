@@ -5,6 +5,7 @@
  */
 package com.mycompany.hibernate5;
 
+import com.mycompany.hibernate5.dto.CustomerMapper;
 import com.mycompany.hibernate5.sakila.domain.Address;
 import com.mycompany.hibernate5.sakila.domain.Customer;
 import com.mycompany.hibernate5.sakila.domain.Customer_;
@@ -125,6 +126,12 @@ public class Main {
 
 				//TODO Solve lazy load exception for detached state.
 //				em.close();
+
+				//MapStruct
+				Customer c2 = CustomerMapper.INSTANCE.customerMapper(c);
+				lg.info("Customer name: " + c2.getFirstName());
+
+
 
 				for (Payment p : c.getPaymentList()) {
 					lg.log(Level.INFO, "Payment id: {0} Amount: {1}", new Object[]{p.getPaymentId(), p.getAmount()});
