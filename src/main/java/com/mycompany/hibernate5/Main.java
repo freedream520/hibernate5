@@ -22,6 +22,8 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
+import org.dozer.DozerBeanMapper;
+import org.dozer.Mapper;
 
 /**
  *
@@ -44,7 +46,8 @@ public class Main {
 		try {
 //			criteriaQuery(emf);
 //			nativeQuery(emf);
-			testJPA(emf);
+//			testJPA(emf);
+			testDozer(emf);
 		} finally {
 			if (emf != null && emf.isOpen()) {
 				emf.close();
@@ -126,12 +129,9 @@ public class Main {
 
 				//TODO Solve lazy load exception for detached state.
 //				em.close();
-
 				//MapStruct
 				Customer c2 = CustomerMapper.INSTANCE.customerMapper(c);
 				lg.info("Customer name: " + c2.getFirstName());
-
-
 
 				for (Payment p : c.getPaymentList()) {
 					lg.log(Level.INFO, "Payment id: {0} Amount: {1}", new Object[]{p.getPaymentId(), p.getAmount()});
@@ -170,6 +170,40 @@ public class Main {
 				lg.info("Address: " + cust.getAddressId().getAddress());
 			}
 
+		} catch (Exception e) {
+			lg.log(Level.SEVERE, e.getMessage(), e);
+//			e.printStackTrace();
+		} finally {
+			if (em != null && em.isOpen()) {
+				em.close();
+			}
+		}
+
+	}
+
+	private static void testDozer(EntityManagerFactory emf) {
+
+		EntityManager em = emf.createEntityManager();
+		try {
+			lg.info("testing Dozer in hibernate");
+			
+			//do queries
+			String ql = "select c from Customer c "
+				+ "where c.lastName = :lastName";
+			List<Customer> list = em.createQuery(ql).setParameter("lastName", "Vest")
+				.setMaxResults(10).getResultList();
+
+			for (Customer c : list) {
+				lg.log(Level.INFO, "Customer Name {0}", c.getLastName());
+				c.getRentalList().size();
+				
+//				Mapper mapper = new DozerBeanMapper();
+//				em.close();
+//				Customer c2 = mapper.map(c, Customer.class);
+			}
+			
+			
+			
 		} catch (Exception e) {
 			lg.log(Level.SEVERE, e.getMessage(), e);
 //			e.printStackTrace();
