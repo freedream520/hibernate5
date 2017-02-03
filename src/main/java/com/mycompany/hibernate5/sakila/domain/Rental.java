@@ -111,6 +111,7 @@ public class Rental implements Serializable {
 		this.lastUpdate = lastUpdate;
 	}
 
+	@XmlTransient
 	public Customer getCustomerId() {
 		return customerId;
 	}

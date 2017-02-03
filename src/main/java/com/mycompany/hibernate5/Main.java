@@ -10,7 +10,6 @@ import com.mycompany.hibernate5.sakila.domain.Address;
 import com.mycompany.hibernate5.sakila.domain.Customer;
 import com.mycompany.hibernate5.sakila.domain.Customer_;
 import com.mycompany.hibernate5.sakila.domain.Address_;
-import com.mycompany.hibernate5.sakila.domain.Payment;
 import com.mycompany.hibernate5.sakila.domain.Rental;
 import java.util.List;
 import java.util.logging.Level;
@@ -22,8 +21,9 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
-import org.dozer.DozerBeanMapper;
-import org.dozer.Mapper;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 /**
  *
@@ -46,8 +46,8 @@ public class Main {
 		try {
 //			criteriaQuery(emf);
 //			nativeQuery(emf);
-//			testJPA(emf);
-			testDozer(emf);
+			testJPA(emf);
+//			testDozer(emf);
 		} finally {
 			if (emf != null && emf.isOpen()) {
 				emf.close();
@@ -101,8 +101,11 @@ public class Main {
 	}
 
 	public static void testJPA(EntityManagerFactory emf) {
-		//Testing JPA
 
+		//MapStruct
+		Customer c2 = new Customer();
+
+		//Testing JPA
 		EntityManager em = null;
 		try {
 			em = emf.createEntityManager();
@@ -129,13 +132,12 @@ public class Main {
 
 				//TODO Solve lazy load exception for detached state.
 //				em.close();
-				//MapStruct
-				Customer c2 = CustomerMapper.INSTANCE.customerMapper(c);
-				lg.info("Customer name: " + c2.getFirstName());
-
-				for (Payment p : c.getPaymentList()) {
-					lg.log(Level.INFO, "Payment id: {0} Amount: {1}", new Object[]{p.getPaymentId(), p.getAmount()});
-				}
+				
+				c2 = CustomerMapper.INSTANCE.customerMapper(c);
+				
+//				for (Payment p : c.getPaymentList()) {
+//					lg.log(Level.INFO, "Payment id: {0} Amount: {1}", new Object[]{p.getPaymentId(), p.getAmount()});
+//				}
 
 //				c.getAddressId().getAddress();
 			}
@@ -149,6 +151,27 @@ public class Main {
 				em.close();
 			}
 		}
+		
+		lg.info("Customer name: " + c2.getFirstName());
+//		c2.setAddressId(null);
+//		c2.setStoreId(null);
+		
+		JAXBContext jaxbContext;
+		try {
+			jaxbContext = JAXBContext.newInstance(Customer.class);
+			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+
+			// output pretty printed
+			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+			jaxbMarshaller.marshal(c2, System.out);
+			
+			
+		} catch (JAXBException ex) {
+			Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		
+
 	}
 
 	private static void criteriaQuery(EntityManagerFactory emf) {
@@ -186,7 +209,7 @@ public class Main {
 		EntityManager em = emf.createEntityManager();
 		try {
 			lg.info("testing Dozer in hibernate");
-			
+
 			//do queries
 			String ql = "select c from Customer c "
 				+ "where c.lastName = :lastName";
@@ -196,14 +219,12 @@ public class Main {
 			for (Customer c : list) {
 				lg.log(Level.INFO, "Customer Name {0}", c.getLastName());
 				c.getRentalList().size();
-				
+
 //				Mapper mapper = new DozerBeanMapper();
 //				em.close();
 //				Customer c2 = mapper.map(c, Customer.class);
 			}
-			
-			
-			
+
 		} catch (Exception e) {
 			lg.log(Level.SEVERE, e.getMessage(), e);
 //			e.printStackTrace();

@@ -21,11 +21,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -66,12 +66,10 @@ public class Customer implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
 	private Date lastUpdate;
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId", fetch = FetchType.LAZY)
-//	@OrderColumn(name = "rental_id")
-//	@Fetch(value = FetchMode.SUBSELECT)
+//	@XmlElementWrapper(name="rental-list")
+//	@XmlElement(name="rental")
 	private List<Rental> rentalList;
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId", fetch = FetchType.LAZY)
-//	@OrderBy("payment_id DESC")
-//	@Fetch(value = FetchMode.SUBSELECT)
 	private List<Payment> paymentList;
 	@JoinColumn(name = "address_id", referencedColumnName = "address_id")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
