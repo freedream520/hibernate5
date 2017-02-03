@@ -113,7 +113,7 @@ public class Main {
 			//do queries
 			String ql = "select c from Customer c "
 				+ "join fetch c.rentalList r "
-				+ "join c.paymentList p "
+//				+ "join c.paymentList p "
 				+ "where c.lastName = :lastName";
 			List<Customer> list = em.createQuery(ql).setParameter("lastName", "Vest")
 				.setMaxResults(10).getResultList();
@@ -130,9 +130,6 @@ public class Main {
 					}
 				}
 
-				//TODO Solve lazy load exception for detached state.
-//				em.close();
-				
 				c2 = CustomerMapper.INSTANCE.customerMapper(c);
 				
 //				for (Payment p : c.getPaymentList()) {

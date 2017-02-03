@@ -7,6 +7,7 @@ package com.mycompany.hibernate5.dto;
 
 import com.mycompany.hibernate5.sakila.domain.Customer;
 import com.mycompany.hibernate5.sakila.domain.Rental;
+import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -22,10 +23,15 @@ public interface CustomerMapper {
 
 	@Mapping(target = "addressId", ignore = true)
 	@Mapping(target = "storeId", ignore = true)
+	@Mapping(target = "paymentList", ignore = true)
 	Customer customerMapper(Customer cust);
+
+	List<Rental> rentalListMapper(List<Rental> list);
 
 	@Mapping(target = "inventoryId", ignore = true)
 	@Mapping(target = "staffId", ignore = true)
+	@Mapping(target = "customerId", ignore = true)
+	@Mapping(target = "paymentList", ignore = true)
 	Rental rentalMapper(Rental rent);
 
 }

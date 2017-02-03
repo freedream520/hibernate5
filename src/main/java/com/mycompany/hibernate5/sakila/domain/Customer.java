@@ -66,8 +66,8 @@ public class Customer implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
 	private Date lastUpdate;
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId", fetch = FetchType.LAZY)
-//	@XmlElementWrapper(name="rental-list")
-//	@XmlElement(name="rental")
+	@XmlElementWrapper(name="rental-list")
+	@XmlElement(name="rental")
 	private List<Rental> rentalList;
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId", fetch = FetchType.LAZY)
 	private List<Payment> paymentList;
