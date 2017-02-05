@@ -114,7 +114,7 @@ public class Main {
 			String ql = "select c from Customer c "
 				+ "join fetch c.rentalList r "
 				+ "join fetch c.addressId "
-//				+ "join c.paymentList p "
+//				+ "join fetch c.paymentList p "
 				+ "where c.lastName = :lastName";
 			List<Customer> list = em.createQuery(ql).setParameter("lastName", "Vest")
 				.setMaxResults(10).getResultList();
