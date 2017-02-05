@@ -5,6 +5,7 @@
  */
 package com.mycompany.hibernate5.dto;
 
+import com.mycompany.hibernate5.sakila.domain.Address;
 import com.mycompany.hibernate5.sakila.domain.Customer;
 import com.mycompany.hibernate5.sakila.domain.Rental;
 import java.util.List;
@@ -21,7 +22,7 @@ public interface CustomerMapper {
 
 	CustomerMapper INSTANCE = Mappers.getMapper(CustomerMapper.class);
 
-	@Mapping(target = "addressId", ignore = true)
+//	@Mapping(target = "addressId", ignore = true)
 	@Mapping(target = "storeId", ignore = true)
 	@Mapping(target = "paymentList", ignore = true)
 	Customer customerMapper(Customer cust);
@@ -33,5 +34,10 @@ public interface CustomerMapper {
 	@Mapping(target = "customerId", ignore = true)
 	@Mapping(target = "paymentList", ignore = true)
 	Rental rentalMapper(Rental rent);
+
+	@Mapping(target = "cityId", ignore = true)
+	//JAXB seems to ignore object collections that don't have @XmlElementWrapper
+	//which is fine since they are unintialized anyway.
+	Address addressMapper(Address adr);
 
 }
