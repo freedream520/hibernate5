@@ -26,7 +26,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 /**
- *
+ * Testing Hibernate stuff
  * @author pkipping
  */
 public class Main {
