@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.PersistenceUtil;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
@@ -109,6 +110,7 @@ public class Main {
 		EntityManager em = null;
 		try {
 			em = emf.createEntityManager();
+			PersistenceUtil pu = Persistence.getPersistenceUtil();
 
 			//do queries
 			String ql = "select c from Customer c "
@@ -118,9 +120,17 @@ public class Main {
 				+ "where c.lastName = :lastName";
 			List<Customer> list = em.createQuery(ql).setParameter("lastName", "Vest")
 				.setMaxResults(10).getResultList();
+			
+			
 
 			for (Customer c : list) {
 				lg.log(Level.INFO, "Customer Name {0}", c.getLastName());
+				
+				//Check Payment
+				lg.info("Payment List Loaded: " + pu.isLoaded(c.getPaymentList()));
+				lg.info("Address Loaded: " + pu.isLoaded(c.getAddressId()));
+				lg.info("Store Loaded: " + pu.isLoaded(c, "storeId"));
+				
 				int i = 0;
 				for (Rental r : c.getRentalList()) {
 					lg.log(Level.INFO, "Rental ID: {0} rental date {1}", new Object[]{r.getRentalId(), r.getRentalDate()});
