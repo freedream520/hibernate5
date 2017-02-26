@@ -126,7 +126,8 @@ public class Main {
 			for (Customer c : list) {
 				lg.log(Level.INFO, "Customer Name {0}", c.getLastName());
 				
-				//Check Payment
+				//Check Load States
+				lg.info("Rental List Loaded: " + pu.isLoaded(c.getRentalList()));
 				lg.info("Payment List Loaded: " + pu.isLoaded(c.getPaymentList()));
 				lg.info("Address Loaded: " + pu.isLoaded(c.getAddressId()));
 				lg.info("Store Loaded: " + pu.isLoaded(c, "storeId"));
