@@ -6,6 +6,7 @@
 package com.mycompany.hibernate5;
 
 import com.mycompany.hibernate5.dto.CustomerMapper;
+import com.mycompany.hibernate5.dto.CustomerMapper2;
 import com.mycompany.hibernate5.sakila.domain.Address;
 import com.mycompany.hibernate5.sakila.domain.Customer;
 import com.mycompany.hibernate5.sakila.domain.Customer_;
@@ -28,10 +29,11 @@ import javax.xml.bind.Marshaller;
 
 /**
  * Testing Hibernate stuff
+ *
  * @author pkipping
  */
 public class Main {
-
+	
 	private static final Logger lg = Logger.getLogger(Main.class.getName());
 
 	/**
@@ -41,14 +43,15 @@ public class Main {
 		// TODO code application logic here
 		System.out.println("Hello World!");
 		lg.info("Testing logger");
-
+		
 		EntityManagerFactory emf = Persistence.createEntityManagerFactory("sakila");
-
+		
 		try {
 //			criteriaQuery(emf);
 //			nativeQuery(emf);
-			testJPA(emf);
+//			testJPA(emf);
 //			testDozer(emf);
+			testMapStruct(emf);
 		} finally {
 			if (emf != null && emf.isOpen()) {
 				emf.close();
@@ -56,9 +59,9 @@ public class Main {
 			lg.info("Closing EM Factory");
 		}
 	}
-
+	
 	public static void nativeQuery(EntityManagerFactory emf) {
-
+		
 		EntityManager em = emf.createEntityManager();
 		try {
 			String q = "select c from Customer c WHERE c.lastName = :lastName";
@@ -67,7 +70,7 @@ public class Main {
 				.setParameter("lastName", "Vest")
 				.setHint("org.hibernate.readOnly", true)
 				.getResultList();
-
+			
 			for (Customer c : list) {
 				lg.info("Customer Name: " + c.getFirstName() + " " + c.getLastName());
 				c.setFirstName("JULIAN");
@@ -78,7 +81,7 @@ public class Main {
 			List<Object[]> cust1 = em.createNativeQuery(
 				"SELECT * FROM customer LIMIT 5")
 				.getResultList();
-
+			
 			for (Object[] c : cust1) {
 				lg.info("Name: " + c[2]);
 			}
@@ -87,10 +90,10 @@ public class Main {
 			List<Customer> cust2 = em.createNativeQuery(
 				"SELECT * FROM customer LIMIT 5", Customer.class)
 				.getResultList();
-
+			
 			em.getTransaction().commit();
 			em.close();
-
+			
 		} catch (Exception e) {
 			lg.log(Level.SEVERE, e.getMessage(), e);
 //			e.printStackTrace();
@@ -100,7 +103,7 @@ public class Main {
 			}
 		}
 	}
-
+	
 	public static void testJPA(EntityManagerFactory emf) {
 
 		//MapStruct
@@ -116,16 +119,14 @@ public class Main {
 			String ql = "select c from Customer c "
 				+ "join fetch c.rentalList r "
 				+ "join fetch c.addressId "
-//				+ "join fetch c.paymentList p "
+				//				+ "join fetch c.paymentList p "
 				+ "where c.lastName = :lastName";
 			List<Customer> list = em.createQuery(ql).setParameter("lastName", "Vest")
 				.setMaxResults(10).getResultList();
 			
-			
-
 			for (Customer c : list) {
 				lg.log(Level.INFO, "Customer Name {0}", c.getLastName());
-				
+
 				//Check Load States
 				lg.info("Rental List Loaded: " + pu.isLoaded(c.getRentalList()));
 				lg.info("Payment List Loaded: " + pu.isLoaded(c.getPaymentList()));
@@ -141,17 +142,16 @@ public class Main {
 						break;
 					}
 				}
-
-				c2 = CustomerMapper.INSTANCE.customerMapper(c);
 				
+				c2 = CustomerMapper.INSTANCE.customerMapper(c);
+
 //				for (Payment p : c.getPaymentList()) {
 //					lg.log(Level.INFO, "Payment id: {0} Amount: {1}", new Object[]{p.getPaymentId(), p.getAmount()});
 //				}
-
 //				c.getAddressId().getAddress();
 			}
 			lg.info("finished query");
-
+			
 		} catch (Exception e) {
 			lg.log(Level.SEVERE, e.getMessage(), e);
 //			e.printStackTrace();
@@ -172,19 +172,17 @@ public class Main {
 
 			// output pretty printed
 			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-
-			jaxbMarshaller.marshal(c2, System.out);
 			
+			jaxbMarshaller.marshal(c2, System.out);
 			
 		} catch (JAXBException ex) {
 			Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		
-
 	}
-
+	
 	private static void criteriaQuery(EntityManagerFactory emf) {
-
+		
 		EntityManager em = emf.createEntityManager();
 		try {
 			lg.info("testing criteria query in hibernate");
@@ -195,13 +193,13 @@ public class Main {
 			criteria.select(root);
 			criteria.where(builder.and(builder.equal(root.get(Customer_.lastName), "Vest"),
 				builder.like(address.get(Address_.address), "923%")));
-
+			
 			List<Customer> customers = em.createQuery(criteria).getResultList();
 			for (Customer cust : customers) {
 				lg.info("Customer Name: " + cust.getFirstName() + " " + cust.getLastName());
 				lg.info("Address: " + cust.getAddressId().getAddress());
 			}
-
+			
 		} catch (Exception e) {
 			lg.log(Level.SEVERE, e.getMessage(), e);
 //			e.printStackTrace();
@@ -210,11 +208,11 @@ public class Main {
 				em.close();
 			}
 		}
-
+		
 	}
-
+	
 	private static void testDozer(EntityManagerFactory emf) {
-
+		
 		EntityManager em = emf.createEntityManager();
 		try {
 			lg.info("testing Dozer in hibernate");
@@ -224,7 +222,7 @@ public class Main {
 				+ "where c.lastName = :lastName";
 			List<Customer> list = em.createQuery(ql).setParameter("lastName", "Vest")
 				.setMaxResults(10).getResultList();
-
+			
 			for (Customer c : list) {
 				lg.log(Level.INFO, "Customer Name {0}", c.getLastName());
 				c.getRentalList().size();
@@ -233,7 +231,7 @@ public class Main {
 //				em.close();
 //				Customer c2 = mapper.map(c, Customer.class);
 			}
-
+			
 		} catch (Exception e) {
 			lg.log(Level.SEVERE, e.getMessage(), e);
 //			e.printStackTrace();
@@ -242,7 +240,41 @@ public class Main {
 				em.close();
 			}
 		}
-
+		
 	}
+	
+	private static void testMapStruct(EntityManagerFactory emf) {
+		
+		//MapStruct
+		Customer c2 = new Customer();
+		
+		EntityManager em = emf.createEntityManager();
+		try {
+			lg.info("testing MapStruct in hibernate");
 
+			//do queries
+			String ql = "select c from Customer c "
+				+ "where c.lastName = :lastName";
+			List<Customer> list = em.createQuery(ql).setParameter("lastName", "Vest")
+				.setMaxResults(10).getResultList();
+			
+			for (Customer c : list) {
+				lg.log(Level.INFO, "Customer Name {0}", c.getLastName());
+				
+				c2 = CustomerMapper2.INSTANCE.customerMapper(c);
+			}
+			
+		} catch (Exception e) {
+			lg.log(Level.SEVERE, e.getMessage(), e);
+//			e.printStackTrace();
+		} finally {
+			if (em != null && em.isOpen()) {
+				em.close();
+			}
+		}
+		
+		lg.info("Customer Name: " + c2.getFirstName() + " " + c2.getLastName());
+//		lg.info("Address: " + c2.getAddressId().getAddress());
+	}
+	
 }

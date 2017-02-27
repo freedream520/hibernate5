@@ -37,7 +37,6 @@ public interface CustomerMapper {
 
 	@Mapping(target = "cityId", ignore = true)
 	//JAXB seems to ignore object collections that don't have @XmlElementWrapper
-	//which is fine since they are unintialized anyway.
 	//but Mapstruct Lazy Loads the collections so it is ineffiecent.
 	@Mapping(target = "staffList", ignore = true)
 	@Mapping(target = "storeList", ignore = true)
